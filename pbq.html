@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CompTIA A+ Simulation Lab | Professional Edition</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        
+button:hover, .glass-card:hover, .stat-card:hover {
+    border-color: inherit !important;
+    background-color: inherit !important;
+    transform: none !important;
+}
+
+
+#options-container button:hover {
+    border-color: #e2e8f0 !important; 
+}
+
+/* Darkmode Korrektur für Hover */
+body.dark #options-container button:hover {
+    border-color: #334155 !important; /* Darkmode Rahmenfarbe */
+}
+        .hidden-view { display: none !important; }
+        body { background-color: #020617; color: #f1f5f9; transition: background-color 0.3s; }
+        .glass-card { background-color: #0f172a; border: 1px solid #1e293b; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.5); }
+        
+        /* Eingabefelder */
+        .input-group { margin-bottom: 1.5rem; width: 100%; max-width: 400px; }
+        select, input[type="text"], input[type="password"] { 
+            background-color: #020617 !important; 
+            border: 2px solid #1e293b !important; 
+            color: #f1f5f9 !important; 
+            width: 100%; 
+            padding: 0.75rem; 
+            border-radius: 0.75rem;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+        select:focus, input:focus { border-color: #3b82f6 !important; }
+        
+        .instruction-box { background-color: #020617; border-left: 4px solid #3b82f6; }
+        .disk-opt.selected, .wire-opt.selected { border-color: #3b82f6 !important; background-color: rgba(59, 130, 246, 0.1); }
+        
+        @keyframes pulse-red { 0%, 100% { background-color: rgba(127, 29, 29, 0.4); } 50% { background-color: rgba(220, 38, 38, 0.6); } }
+        .animate-fail { animation: pulse-red 2s infinite; }
+
+        .wire-slot { width: 35px; height: 120px; border: 1px dashed #334155; border-radius: 4px; display: flex; align-items: flex-end; justify-content: center; overflow: hidden; background: #020617; cursor: pointer; }
+        .wire-fill { width: 100%; height: 0%; transition: height 0.3s, background-color 0.3s; border-radius: 2px; }
+    </style>
+</head>
+<body class="font-sans min-h-screen">
+
+    <nav class="sticky top-0 z-50 bg-slate-900/90 backdrop-blur-md border-b border-slate-800 px-6 py-4">
+        <div class="max-w-5xl mx-auto grid grid-cols-3 items-center">
+            <div class="flex justify-start"><a href="index.html" class="flex items-center text-blue-400 font-bold hover:text-blue-300 text-sm"><svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>Dashboard</a></div>
+            <div class="flex justify-center"><button onclick="resetView()" class="text-xs font-black text-slate-300 uppercase tracking-[0.2em] hover:text-blue-400">Simulationen</button></div>
+            <div class="flex justify-end"><span class="text-[9px] font-black text-slate-600 uppercase tracking-[0.2em]">Lab v3.2</span></div>
+        </div>
+    </nav>
+
+    <main class="max-w-6xl mx-auto p-6 md:p-10">
+
+        <div id="view-selection">
+            <h2 class="text-3xl font-black mb-8 tracking-tight">Prüfungsszenarien</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <button onclick="showSim('view-pbq-router')" class="glass-card p-6 rounded-2xl text-left border-l-4 border-l-blue-500 hover:scale-[1.02] transition-all group"><h3 class="font-bold text-lg mb-1 text-blue-400">01. Router</h3><p class="text-[10px] text-slate-400">Security & IP Lab.</p></button>
+                <button onclick="showSim('view-pbq-raid')" class="glass-card p-6 rounded-2xl text-left border-l-4 border-l-orange-500 hover:scale-[1.02] transition-all group"><h3 class="font-bold text-lg mb-1 text-orange-400">02. RAID</h3><p class="text-[10px] text-slate-400">Storage Recovery.</p></button>
+                <button onclick="showSim('view-pbq-mainboard')" class="glass-card p-6 rounded-2xl text-left border-l-4 border-l-purple-500 hover:scale-[1.02] transition-all group"><h3 class="font-bold text-lg mb-1 text-purple-400">03. Hardware</h3><p class="text-[10px] text-slate-400">Mainboard ID.</p></button>
+                <button onclick="showSim('view-pbq-cabling')" class="glass-card p-6 rounded-2xl text-left border-l-4 border-l-green-500 hover:scale-[1.02] transition-all group"><h3 class="font-bold text-lg mb-1 text-green-400">04. Crimping</h3><p class="text-[10px] text-slate-400">Network Cabling.</p></button>
+                <button onclick="showSim('view-pbq-mixed')" class="glass-card p-6 rounded-2xl text-left border-l-4 border-l-red-500 hover:scale-[1.02] transition-all group"><h3 class="font-bold text-lg mb-1 text-red-400">05. Deployment</h3><p class="text-[10px] text-slate-400">Hybrid Expert Task.</p></button>
+            </div>
+        </div>
+
+        <div id="view-pbq-router" class="hidden-view"><div class="glass-card rounded-3xl overflow-hidden border-t-4 border-t-blue-500"><div class="p-8 md:p-12"><h2 class="text-2xl font-black mb-8 italic">Router Setup</h2><div class="instruction-box p-6 mb-10 rounded-r-xl"><p class="text-sm text-slate-300">Konfiguration: SSID <b>Corp_Admin</b>, stärkster Standard, Passwort <b>Aplus2026!</b>, Broadcast <b>Aus</b>. IP: <b>letzte nutzbare IP</b> in 192.168.1.0/24.</p></div><div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-10"><div class="space-y-4"><div><label class="block text-xs font-bold text-slate-500 mb-2">SSID</label><input type="text" id="r-ssid" class="w-full"></div><div><label class="block text-xs font-bold text-slate-500 mb-2">Security</label><select id="r-sec"><option value="WEP">WEP</option><option value="WPA2">WPA2</option><option value="WPA3">WPA3</option></select></div><div class="flex items-center p-4 bg-slate-950/40 rounded-xl border border-slate-800"><input type="checkbox" id="r-bc" class="w-5 h-5" checked><label class="ml-4 text-xs font-bold text-slate-400">Broadcast SSID</label></div></div><div class="space-y-4"><div><label class="block text-xs font-bold text-slate-500 mb-2">Router IP</label><input type="text" id="r-ip" class="font-mono" placeholder="192.168.1.???"></div><div><label class="block text-xs font-bold text-slate-500 mb-2">WPA Passphrase</label><input type="password" id="r-pass"></div></div></div><button onclick="checkRouterPro()" class="w-full bg-blue-600 py-5 rounded-2xl font-black shadow-xl hover:bg-blue-500 transition-all">Speichern</button></div></div></div>
+
+        <div id="view-pbq-raid" class="hidden-view"><div class="glass-card rounded-3xl overflow-hidden border-t-4 border-t-orange-500"><div class="p-8 md:p-12"><h2 class="text-2xl font-black mb-8 italic italic text-slate-100">RAID Manager</h2><div class="instruction-box p-6 mb-10 rounded-r-xl"><p class="text-sm text-slate-300">Server 2 <b>Degraded</b>. Wähle die optimale Platte (Größe & Speed).</p></div><div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-10"><div class="p-6 border border-slate-800 rounded-2xl bg-slate-950/30"><h5 class="text-[10px] font-black text-orange-500 uppercase mb-4 tracking-widest">Server_02 Status</h5><div class="grid grid-cols-2 gap-3 text-[10px]"><div class="bg-slate-900 border border-slate-700 p-3 rounded text-slate-300">Disk 0: 2TB | 7.2k <span class="text-green-500 ml-2">●</span></div><div class="bg-red-900/40 border border-red-500 p-3 rounded font-bold text-red-500 animate-fail">Disk 1: FAILED</div><div class="bg-slate-900 border border-slate-700 p-3 rounded text-slate-300">Disk 2: 2TB | 7.2k <span class="text-green-500 ml-2">●</span></div><div class="bg-slate-900 border border-slate-700 p-3 rounded text-slate-300">Disk 3: 2TB | 7.2k <span class="text-green-500 ml-2">●</span></div></div></div><div class="space-y-2"><button onclick="selectDisk(1, this)" class="disk-opt w-full text-left p-4 border border-slate-800 rounded-xl text-sm font-bold text-slate-200">A: 500 GB SSD (SATA)</button><button onclick="selectDisk(2, this)" class="disk-opt w-full text-left p-4 border border-slate-800 rounded-xl text-sm font-bold text-slate-200">B: 2 TB HDD (5.4k RPM)</button><button onclick="selectDisk(3, this)" class="disk-opt w-full text-left p-4 border border-slate-800 rounded-xl text-sm font-bold text-slate-200">C: 2 TB HDD (7.2k RPM)</button><button onclick="selectDisk(4, this)" class="disk-opt w-full text-left p-4 border border-slate-800 rounded-xl text-sm font-bold text-slate-200">D: 4 TB HDD (15k RPM)</button></div></div><button onclick="checkRaidPro()" id="raid-submit-btn" class="w-full bg-orange-600 py-5 rounded-2xl font-black opacity-50 cursor-not-allowed">Rebuild starten</button></div></div></div>
+
+        <div id="view-pbq-mainboard" class="hidden-view"><div class="glass-card rounded-3xl overflow-hidden border-t-4 border-t-purple-500"><div class="p-8 md:p-12"><h2 class="text-2xl font-black mb-6 italic italic text-slate-100">Mainboard Identification</h2><div class="instruction-box p-4 mb-8 rounded-r-xl"><p class="text-sm text-slate-300">Ordnen Sie die Komponenten (A-F) zu.</p></div><div class="flex flex-col lg:flex-row gap-12 items-start justify-center"><div class="bg-black p-2 rounded-2xl border-2 border-slate-800 max-w-xl shadow-2xl"><img src="mainboard.jpg" class="rounded-xl opacity-90 w-full h-auto"></div>
+        <div class="flex flex-col w-full max-w-[400px]">
+            <div class="input-group"><label class="text-[11px] font-black text-slate-500 uppercase tracking-widest mb-2 block">A:</label><select id="mb-a"><option value="">-- Wählen --</option><option value="ram">DIMM Slots</option><option value="cpu">CPU Sockel</option><option value="chip">Chipset</option></select></div>
+            <div class="input-group"><label class="text-[11px] font-black text-slate-500 uppercase tracking-widest mb-2 block">B:</label><select id="mb-b"><option value="">-- Wählen --</option><option value="pcie">PCIe x16 Slot</option><option value="m2">M.2 Slot</option><option value="agp">Legacy AGP</option></select></div>
+            <div class="input-group"><label class="text-[11px] font-black text-slate-500 uppercase tracking-widest mb-2 block">C:</label><select id="mb-c"><option value="">-- Wählen --</option><option value="bios">BIOS Chip</option><option value="cmos">CMOS Batterie</option><option value="speaker">Speaker</option></select></div>
+            <div class="input-group"><label class="text-[11px] font-black text-slate-500 uppercase tracking-widest mb-2 block">D:</label><select id="mb-d"><option value="">-- Wählen --</option><option value="case">Case / Front Headers</option><option value="eps">EPS Power</option><option value="atx">Main Power</option></select></div>
+            <div class="input-group"><label class="text-[11px] font-black text-slate-500 uppercase tracking-widest mb-2 block">E:</label><select id="mb-e"><option value="">-- Wählen --</option><option value="ide">Legacy IDE</option><option value="usb">Internal USB</option><option value="sata">SATA Anschlüsse</option></select></div>
+            <div class="input-group"><label class="text-[11px] font-black text-slate-500 uppercase tracking-widest mb-2 block">F:</label><select id="mb-f"><option value="">-- Wählen --</option><option value="ram">DIMM / RAM Slots</option><option value="atx">Power Connector</option><option value="pci">Expansion Slots</option></select></div>
+            <button onclick="checkMainboardPro()" class="w-full bg-purple-600 py-5 rounded-2xl font-black shadow-xl hover:bg-purple-500 transition-all">Validieren</button>
+        </div></div></div></div></div>
+
+        <div id="view-pbq-cabling" class="hidden-view"><div class="glass-card rounded-3xl overflow-hidden border-t-4 border-t-green-500"><div class="p-8 md:p-12"><h2 class="text-2xl font-black mb-8 italic italic text-slate-100 text-slate-100">Network Termination (T568B)</h2><div class="instruction-box p-6 mb-10 rounded-r-xl"><p class="text-sm text-slate-300">Tippe erst eine Ader an, dann den Ziel-Pin (1-8).</p></div><div class="flex flex-col items-center"><div class="bg-slate-800 p-8 rounded-t-3xl border-x-4 border-t-4 border-slate-700 w-full max-w-md shadow-2xl"><div class="flex justify-between gap-1"><div onclick="assignWire(0)" class="wire-slot"><div id="slot-0" class="wire-fill"></div></div><div onclick="assignWire(1)" class="wire-slot"><div id="slot-1" class="wire-fill"></div></div><div onclick="assignWire(2)" class="wire-slot"><div id="slot-2" class="wire-fill"></div></div><div onclick="assignWire(3)" class="wire-slot"><div id="slot-3" class="wire-fill"></div></div><div onclick="assignWire(4)" class="wire-slot"><div id="slot-4" class="wire-fill"></div></div><div onclick="assignWire(5)" class="wire-slot"><div id="slot-5" class="wire-fill"></div></div><div onclick="assignWire(6)" class="wire-slot"><div id="slot-6" class="wire-fill"></div></div><div onclick="assignWire(7)" class="wire-slot"><div id="slot-7" class="wire-fill"></div></div></div><div class="flex justify-between mt-2 px-1 text-[10px] font-black text-slate-500 uppercase tracking-widest"><span>Pin 1</span><span>Pin 8</span></div></div><div class="w-full max-w-md h-12 bg-slate-700 rounded-b-xl border-x-4 border-b-4 border-slate-600 mb-10"></div><div class="grid grid-cols-4 sm:grid-cols-8 gap-3 w-full"><button onclick="selectWire('WO', this)" class="wire-opt border-2 border-slate-800 p-2 rounded-lg flex flex-col items-center"><div class="w-4 h-8 bg-white border-r-4 border-orange-500 rounded"></div><span class="text-[7px] font-bold mt-1">W-O</span></button><button onclick="selectWire('O', this)" class="wire-opt border-2 border-slate-800 p-2 rounded-lg flex flex-col items-center"><div class="w-4 h-8 bg-orange-500 rounded"></div><span class="text-[7px] font-bold mt-1">O</span></button><button onclick="selectWire('WG', this)" class="wire-opt border-2 border-slate-800 p-2 rounded-lg flex flex-col items-center"><div class="w-4 h-8 bg-white border-r-4 border-green-500 rounded"></div><span class="text-[7px] font-bold mt-1">W-G</span></button><button onclick="selectWire('B', this)" class="wire-opt border-2 border-slate-800 p-2 rounded-lg flex flex-col items-center"><div class="w-4 h-8 bg-blue-500 rounded"></div><span class="text-[7px] font-bold mt-1">B</span></button><button onclick="selectWire('WB', this)" class="wire-opt border-2 border-slate-800 p-2 rounded-lg flex flex-col items-center"><div class="w-4 h-8 bg-white border-r-4 border-blue-500 rounded"></div><span class="text-[7px] font-bold mt-1">W-B</span></button><button onclick="selectWire('G', this)" class="wire-opt border-2 border-slate-800 p-2 rounded-lg flex flex-col items-center"><div class="w-4 h-8 bg-green-500 rounded"></div><span class="text-[7px] font-bold mt-1">G</span></button><button onclick="selectWire('WBR', this)" class="wire-opt border-2 border-slate-800 p-2 rounded-lg flex flex-col items-center"><div class="w-4 h-8 bg-white border-r-4 border-amber-900 rounded"></div><span class="text-[7px] font-bold mt-1">W-BR</span></button><button onclick="selectWire('BR', this)" class="wire-opt border-2 border-slate-800 p-2 rounded-lg flex flex-col items-center"><div class="w-4 h-8 bg-amber-900 rounded"></div><span class="text-[7px] font-bold mt-1">BR</span></button></div></div><div class="mt-12 flex gap-4"><button onclick="checkCabling()" class="flex-1 bg-green-600 py-4 rounded-2xl font-black">Crimp Fertig</button><button onclick="clearCabling()" class="px-8 bg-slate-800 py-4 rounded-2xl text-slate-500">Reset</button></div></div></div></div>
+
+        <div id="view-pbq-mixed" class="hidden-view"><div class="glass-card rounded-3xl overflow-hidden border-t-4 border-t-red-500"><div class="p-8 md:p-12"><h2 class="text-2xl font-black mb-8 italic italic text-slate-100">Enterprise Server Deployment</h2>
+            <div class="instruction-box p-6 mb-10 rounded-r-xl">
+                <p class="text-sm text-slate-300 leading-relaxed">
+                    <b>Anforderungen:</b><br>
+                    1. <b>Storage:</b> 4x 4TB Platten. Muss 2 Ausfälle überstehen bei max. Geschwindigkeit.<br>
+                    2. <b>Netzwerk:</b> 80m Distanz, 10 Gbps, geschirmt gegen EM-Störungen.<br>
+                    3. <b>IP:</b> Erste nutzbare IP in 10.0.0.0/24.
+                </p>
+            </div>
+            <div class="space-y-6 max-w-xl mx-auto">
+                <div><label class="text-xs font-black text-slate-500 uppercase block mb-2">RAID-Level & Kapazität</label>
+                    <div class="grid grid-cols-2 gap-4">
+                        <select id="mix-raid"><option value="">-- RAID --</option><option value="0">RAID 0</option><option value="5">RAID 5</option><option value="6">RAID 6</option><option value="10">RAID 10</option></select>
+                        <input type="text" id="mix-cap" placeholder="Kapazität in TB">
+                    </div>
+                </div>
+                <div><label class="text-xs font-black text-slate-500 uppercase block mb-2">Kabeltyp (10G / 80m / STP)</label>
+                    <select id="mix-cable"><option value="">-- Wählen --</option><option value="cat5e">Cat 5e UTP</option><option value="cat6">Cat 6 UTP</option><option value="cat6a">Cat 6a STP</option><option value="fiber">Fiber</option></select>
+                </div>
+                <div><label class="text-xs font-black text-slate-500 uppercase block mb-2">Server IP (Erste nutzbare in 10.0.0.0/24)</label>
+                    <input type="text" id="mix-ip" placeholder="0.0.0.0">
+                </div>
+            </div>
+            <button onclick="checkMixedTask()" class="mt-12 w-full bg-red-600 py-5 rounded-2xl font-black shadow-xl hover:bg-red-500 transition-all">Deployment validieren</button>
+        </div></div></div>
+
+    </main>
+
+    <script>
+        let selectedDiskId = null;
+        let selectedWireType = null;
+        let currentCabling = [null, null, null, null, null, null, null, null];
+        const colorMap = { 'WO': '#fb923c', 'O': '#f97316', 'WG': '#4ade80', 'B': '#3b82f6', 'WB': '#60a5fa', 'G': '#22c55e', 'WBR': '#78350f', 'BR': '#451a03' };
+
+        function showSim(id) {
+            document.querySelectorAll('main > div').forEach(div => div.classList.add('hidden-view'));
+            document.getElementById(id).classList.remove('hidden-view');
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function resetView() {
+            document.querySelectorAll('main > div').forEach(div => div.classList.add('hidden-view'));
+            document.getElementById('view-selection').classList.remove('hidden-view');
+            selectedDiskId = null;
+        }
+
+        function checkRouterPro() {
+            const ssid = document.getElementById('r-ssid').value.trim();
+            const sec = document.getElementById('r-sec').value;
+            const pass = document.getElementById('r-pass').value;
+            const bc = document.getElementById('r-bc').checked;
+            const ip = document.getElementById('r-ip').value.trim();
+            if (ssid === "Corp_Admin" && sec === "WPA3" && pass === "Aplus2026!" && !bc && ip === "192.168.1.254") {
+                alert("Erfolg! Konfiguration korrekt."); resetView();
+            } else { alert("Fehler in der Konfiguration!"); }
+        }
+
+        function selectDisk(id, el) {
+            selectedDiskId = id;
+            document.querySelectorAll('.disk-opt').forEach(b => b.classList.remove('selected'));
+            el.classList.add('selected');
+            document.getElementById('raid-submit-btn').classList.remove('opacity-50', 'cursor-not-allowed');
+        }
+
+        function checkRaidPro() {
+            if (selectedDiskId === 3) { alert("Richtig! 2TB/7.2k SAS gewählt."); resetView(); }
+            else { alert("Inkorrekt."); }
+        }
+
+        function checkMainboardPro() {
+            const a = document.getElementById('mb-a').value;
+            const b = document.getElementById('mb-b').value;
+            const c = document.getElementById('mb-c').value;
+            const d = document.getElementById('mb-d').value;
+            const e = document.getElementById('mb-e').value;
+            const f = document.getElementById('mb-f').value;
+            if (a === "cpu" && b === "pcie" && c === "cmos" && d === "case" && e === "sata" && f === "ram") {
+                alert("Hardware-ID Korrekt!"); resetView();
+            } else { alert("Fehler bei A-F."); }
+        }
+
+        function selectWire(type, el) {
+            selectedWireType = type;
+            document.querySelectorAll('.wire-opt').forEach(b => b.classList.remove('selected'));
+            el.classList.add('selected');
+        }
+
+        function assignWire(idx) {
+            if (!selectedWireType) return;
+            currentCabling[idx] = selectedWireType;
+            const el = document.getElementById(`slot-${idx}`);
+            el.style.height = "100%";
+            el.style.backgroundColor = colorMap[selectedWireType];
+            el.style.borderRight = selectedWireType.startsWith('W') ? "6px solid white" : "none";
+        }
+
+        function clearCabling() {
+            currentCabling = [null, null, null, null, null, null, null, null];
+            for (let i = 0; i < 8; i++) document.getElementById(`slot-${i}`).style.height = "0%";
+        }
+
+        function checkCabling() {
+            const ok = ['WO', 'O', 'WG', 'B', 'WB', 'G', 'WBR', 'BR'];
+            if (JSON.stringify(currentCabling) === JSON.stringify(ok)) { alert("Cabling Korrekt!"); resetView(); }
+            else { alert("Falsche Reihenfolge."); }
+        }
+
+        // --- Merken: Hier habe ich einen Fehler gemacht. push() statt append() war die Lösung ---
+        function checkMixedTask() {
+            const raid = document.getElementById('mix-raid').value;
+            const cap = document.getElementById('mix-cap').value.trim();
+            const cable = document.getElementById('mix-cable').value;
+            const ip = document.getElementById('mix-ip').value.trim();
+
+            let errors = [];
+            
+            if (raid !== "6") errors.push("- RAID Level: Nur RAID 6 übersteht 2 beliebige Ausfälle.");
+            if (cap !== "8") errors.push("- Kapazität: RAID 6 (4x4TB) bietet 8TB nutzbaren Platz.");
+            if (cable !== "cat6a") errors.push("- Kabel: Cat 6a (STP) wird für 80m/10G benötigt.");
+            if (ip !== "10.0.0.1") errors.push("- IP: 10.0.0.1 ist die erste nutzbare Host-Adresse.");
+
+            if (errors.length === 0) {
+                alert("DEPLOYMENT ERFOLGREICH!"); resetView();
+            } else {
+                alert("FEHLER:\n" + errors.join("\n"));
+            }
+        }
+    </script>
+</body>
+</html>

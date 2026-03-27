@@ -1,0 +1,567 @@
+<!DOCTYPE html>
+<html lang="de">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CompTIA A+ 220-1201 Simulator by Denis M.</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        #blitz-options button.bg-green-600 {
+    background-color: #16a34a !important; border-color: #22c55e !important; color: white !important;
+}
+#blitz-options button.bg-red-600 {
+    background-color: #dc2626 !important; border-color: #ef4444 !important; color: white !important;
+}
+.correct-answer-highlight {
+    border-color: #22c55e !important;
+    color: #22c55e !important;
+    background-color: rgba(34, 197, 94, 0.1) !important;
+}
+        /* Darkmode als Standard */
+        body { background-color: #0f172a; color: #f1f5f9; }
+        .bg-white { background-color: #1e293b !important; color: #f1f5f9; border-color: #334155; }
+        .bg-slate-50 { background-color: #0f172a !important; border-color: #334155; }
+        .text-slate-800, .text-slate-700 { color: #f1f5f9 !important; }
+        .border-slate-200, .border-slate-700 { border-color: #334155 !important; }
+
+       
+        /* Hover Fix */
+        #acronym-options button:not(.bg-green-600):not(.bg-red-600):hover {
+            border-color: #3b82f6 !important;
+            background-color: rgba(59, 130, 246, 0.1) !important;
+        }
+
+
+        #acronym-options button.bg-green-600 {
+            background-color: #16a34a !important;
+            border-color: #22c55e !important;
+            color: white !important;
+        }
+
+        #acronym-options button.bg-red-600 {
+            background-color: #dc2626 !important;
+            border-color: #ef4444 !important;
+            color: white !important;
+        }
+
+        /* Highlight für richtige Antwort */
+        .correct-answer-highlight {
+            border-color: #22c55e !important;
+            color: #22c55e !important;
+            background-color: rgba(34, 197, 94, 0.1) !important;
+        }
+
+        /* Allgemeine Styles */
+        #options-container button:hover { border-color: #334155 !important; transform: none !important; }
+        #start-btn:hover { background-color: #2563eb !important; }
+        #explanation-box.bg-green-50 { background-color: rgba(22, 101, 52, 0.2) !important; border-color: #22c55e !important; }
+        #explanation-box.bg-red-50 { background-color: rgba(153, 27, 27, 0.2) !important; border-color: #ef4444 !important; }
+        #explanation-text { color: #cbd5e1 !important; }
+
+        .hidden-view { display: none !important; }
+        select { background-color: #1e293b !important; color: #f1f5f9 !important; border-color: #334155 !important; }
+        select:disabled { background-color: #0f172a !important; color: #64748b !important; }
+    </style>
+</head>
+
+<body class="dark font-sans min-h-screen flex items-center justify-center p-4">
+    
+    <div id="view-landing" class="bg-white p-8 rounded-xl shadow-lg w-full max-w-2xl border border-slate-700">
+        <div class="flex justify-between items-center mb-6">
+            <div>
+                <h1 class="text-3xl font-bold text-blue-500">CompTIA A+ Simulator</h1>
+                <p class="text-slate-500 text-sm">Denis M</p>
+            </div>
+            <div class="text-right">
+                <span id="total-questions-badge" class="bg-blue-900 text-blue-200 text-xs font-bold px-2.5 py-0.5 rounded-full">Lade...</span>
+            </div>
+        </div>
+
+        <div id="stats-dashboard" class="mb-8 bg-slate-50 p-6 rounded-lg border border-slate-200">
+            <div class="flex justify-between items-end mb-2">
+                <h3 class="text-xs font-bold text-slate-400 uppercase tracking-widest">Fortschritt</h3>
+                <span id="mastery-text" class="text-xs font-bold text-blue-400">0 / 455 Fragen</span>
+            </div>
+            <div class="w-full bg-slate-800 rounded-full h-4 mb-6 overflow-hidden">
+                <div id="mastery-bar" class="bg-blue-500 h-4 transition-all duration-1000" style="width: 0%"></div>
+            </div>
+            <div id="stats-grid" class="grid grid-cols-2 md:grid-cols-3 gap-4"></div>
+            <button onclick="app.resetGlobalStats()" class="mt-6 text-[10px] text-slate-500 hover:text-red-400 uppercase tracking-widest transition-colors">Statistiken zurücksetzen</button>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+                <label class="block text-sm font-bold text-slate-300 mb-1">Anzahl der Fragen</label>
+                <select id="exam-length" class="w-full border rounded p-3 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    <option value="10">10 Fragen</option>
+                    <option value="25" selected>25 Fragen</option>
+                    <option value="50">50 Fragen</option>
+                    <option value="90">90 Fragen</option>
+                </select>
+            </div>
+            <div>
+                <label class="block text-sm font-bold text-slate-300 mb-1">Kategorie</label>
+                <select id="exam-category" class="w-full border rounded p-3 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    <option value="All">Alle (CompTIA Gewichtung)</option>
+                    <option value="Unmastered">Nur ungelöste Fragen</option>
+                    <option value="Mobile Devices">Mobile Endgeräte</option>
+                    <option value="Networking">Netzwerktechnik</option>
+                    <option value="Hardware">Hardware</option>
+                    <option value="Virtualization & Cloud">Virtualisierung & Cloud</option>
+                    <option value="Troubleshooting">Troubleshooting</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-6">
+    <div id="tutor-container" class="flex items-center p-3 bg-slate-800/50 rounded-lg border border-slate-700">
+        <input type="checkbox" id="tutor-mode" class="w-5 h-5 cursor-pointer">
+        <label for="tutor-mode" class="ml-3 cursor-pointer">
+            <span class="block text-xs font-black uppercase text-slate-200">Tutor-Modus</span>
+            <span class="block text-[9px] text-slate-400">Erklärungen aktiv</span>
+        </label>
+    </div>
+    <div class="grid grid-cols-2 gap-2">
+        <button onclick="app.startBlitz('acronym')" class="flex flex-col justify-center items-center border-2 border-orange-900 bg-orange-950/10 text-orange-400 font-bold rounded-lg hover:bg-orange-900/20 transition-all py-2">
+            <span class="text-[10px] uppercase font-black">Akronym<br>Attack</span>
+        </button>
+        <button onclick="app.startBlitz('port')" class="flex flex-col justify-center items-center border-2 border-red-900 bg-red-950/10 text-red-400 font-bold rounded-lg hover:bg-red-900/20 transition-all py-2">
+            <span class="text-[10px] uppercase font-black">Port<br>Panic</span>
+        </button>
+    </div>
+</div>
+
+        <button onclick="app.startExam()" id="start-btn" class="mt-4 w-full bg-blue-600 text-white font-bold py-4 rounded-lg shadow-md active:scale-95 transition-transform">Simulation starten</button>
+        
+        <a href="pbq.html" class="block mt-4 text-center border-2 border-slate-700 text-slate-300 font-bold py-3 rounded-lg hover:text-white transition-all">Zu den PBQs</a>
+    </div>
+
+    <div id="view-blitz" class="hidden-view bg-white p-8 rounded-xl shadow-lg w-full max-w-xl text-center border border-slate-700">
+    <div id="blitz-quiz-content">
+        <div class="flex justify-between items-center mb-8">
+            <span id="blitz-progress" class="text-xs font-black uppercase text-slate-500 tracking-widest">1 / 20</span>
+            <div id="blitz-timer" class="w-12 h-12 rounded-full border-4 flex items-center justify-center font-bold">10</div>
+        </div>
+        <h1 id="blitz-display" class="text-5xl font-black text-white mb-2 tracking-tighter">DNS</h1>
+        <p id="blitz-hint" class="text-slate-400 text-xs uppercase mb-10 tracking-widest"></p>
+        <div id="blitz-options" class="grid grid-cols-1 gap-3 mb-8"></div>
+        <button onclick="app.showLanding()" class="text-xs text-slate-500 uppercase font-bold tracking-widest hover:text-white">Abbrechen</button>
+    </div>
+
+    <div id="blitz-result-content" class="hidden py-6">
+        <div class="text-6xl mb-4">🏆</div>
+        <h2 id="blitz-result-title" class="text-2xl font-bold mb-2 text-white">Runde beendet!</h2>
+        <p id="blitz-final-score" class="text-4xl font-black text-orange-500 mb-6">0 / 20</p>
+        <button onclick="app.showLanding()" class="w-full bg-slate-100 text-slate-900 font-bold py-4 rounded-lg shadow-lg active:scale-95 transition-transform">Zurück zum Dashboard</button>
+    </div>
+</div>
+
+    <div id="view-quiz" class="hidden-view bg-white p-8 rounded-xl shadow-lg w-full max-w-3xl border border-slate-700">
+        <div class="flex justify-between items-center mb-6">
+            <div class="flex flex-col">
+                <span id="quiz-progress" class="text-sm font-bold text-slate-500 uppercase">FRAGE 1 / X</span>
+                <span id="quiz-timer" class="text-xl font-mono font-bold text-blue-500">00:00</span>
+            </div>
+            <span id="quiz-category" class="text-xs font-bold bg-blue-900 text-blue-200 px-3 py-1.5 rounded-full uppercase">Kategorie</span>
+            <button onclick="app.abortExam()" class="text-xs text-slate-500 font-bold border border-slate-700 px-3 py-1.5 rounded-lg">ABBRECHEN</button>
+        </div>
+        <div class="w-full bg-slate-800 rounded-full h-2 mb-8">
+            <div id="progress-bar" class="bg-blue-500 h-2 rounded-full transition-all duration-500" style="width: 0%"></div>
+        </div>
+        <div id="question-box" class="mb-8">
+            <h2 id="question-text-de" class="text-xl font-semibold leading-relaxed"></h2>
+            <div class="mt-4">
+                <button id="toggle-en-btn" onclick="app.toggleEnglish()" class="text-[10px] font-bold text-blue-400 border border-slate-700 px-2 py-1 rounded uppercase tracking-wider">Englisch</button>
+                <p id="question-text-en" class="hidden mt-3 text-sm text-slate-400 italic leading-relaxed bg-slate-800/50 p-3 rounded border-l-2 border-slate-700"></p>
+            </div>
+        </div>
+        <div id="options-container" class="space-y-3"></div>
+        <div id="explanation-box" class="hidden mt-6 p-5 rounded-xl border-l-4">
+            <p id="explanation-status" class="text-[10px] font-black uppercase mb-1 tracking-widest"></p>
+            <p id="explanation-text" class="text-sm leading-relaxed"></p>
+            <button onclick="app.nextQuestion()" class="mt-4 w-full bg-slate-100 text-slate-900 py-3 rounded-lg font-bold text-xs uppercase tracking-widest">Nächste Frage →</button>
+        </div>
+    </div>
+
+    <div id="view-results" class="hidden-view bg-white p-8 rounded-xl shadow-lg w-full max-w-3xl max-h-[90vh] overflow-y-auto border border-slate-700">
+        <div class="text-center mb-10">
+            <h1 class="text-4xl font-black mb-2 text-white">Auswertung</h1>
+            <div class="inline-block p-6 rounded-full bg-slate-800 mb-4">
+                <p id="final-score" class="text-5xl font-black text-blue-500"></p>
+            </div>
+            <p id="score-comment" class="text-slate-400 font-medium"></p>
+        </div>
+        <div class="mb-10">
+            <h3 class="font-bold text-slate-500 border-b border-slate-700 pb-2 mb-4 text-xs uppercase tracking-widest">Details</h3>
+            <ul id="category-summary" class="grid grid-cols-1 md:grid-cols-2 gap-2"></ul>
+        </div>
+        <div id="review-section" class="hidden mb-10">
+            <h3 class="font-bold text-red-400 border-b border-red-900/50 pb-2 mb-6 text-xs uppercase tracking-widest underline decoration-2">Fehleranalyse</h3>
+            <div id="review-list" class="space-y-6"></div>
+        </div>
+        <button onclick="app.showLanding()" class="w-full bg-blue-600 text-white font-bold py-5 rounded-xl sticky bottom-0 active:scale-95 transition-transform shadow-2xl">Zurück zum Dashboard</button>
+    </div>
+
+    <script>
+        const app = {
+            db: [],
+            db: [], acronymDB: [], portDB: [],
+            blitzTimer: null, blitzSessionList: [], blitzCurrentIndex: 0, blitzScore: 0, blitzType: 'acronym',
+            examSession: [],
+            currentQIndex: 0,
+            userStats: {},
+            selectedOptions: [],
+            incorrectAnswers: [],
+            timerInterval: null,
+            secondsLeft: 0,
+            globalStats: JSON.parse(localStorage.getItem('aPlusStats')) || {
+                totalQuestionsAnswered: 0, totalCorrect: 0, catStats: {}, masteredQuestions: [],
+            },
+
+            acronymTimer: null, acronymSessionList: [], acronymCurrentIndex: 0, acronymScore: 0,
+
+            // Initialisierung
+            async init() {
+                const lengthSelect = document.getElementById('exam-length');
+                const categorySelect = document.getElementById('exam-category');
+                const tutorCheckbox = document.getElementById('tutor-mode');
+                const updateCategoryUI = () => {
+                    if (lengthSelect.value === "90") {
+                        categorySelect.value = "All"; categorySelect.disabled = true;
+                        tutorCheckbox.checked = false; tutorCheckbox.disabled = true;
+                        document.getElementById('tutor-container').classList.add('opacity-50');
+                    } else {
+                        categorySelect.disabled = false; tutorCheckbox.disabled = false;
+                        document.getElementById('tutor-container').classList.remove('opacity-50');
+                    }
+                };
+                lengthSelect.addEventListener('change', updateCategoryUI);
+
+                // Fragen laden
+                try {
+                    const res = await fetch('questions.json');
+                    const rawData = await res.json();
+                    const seenIds = new Set();
+                    this.db = rawData.filter(q => {
+                        const qIdMatch = q.question.match(/\[Q(\d+)\]/);
+                        const qId = qIdMatch ? qIdMatch[1] : q.question;
+                        if (seenIds.has(qId)) return false;
+                        seenIds.add(qId); return true;
+                    });
+                    document.getElementById('total-questions-badge').innerText = `${this.db.length} Fragen geladen`;
+                    this.renderDashboard();
+                } catch (e) { console.error("Fragen-DB Fehler:", e); }
+
+                try {
+        const [qRes, aRes, pRes] = await Promise.all([
+            fetch('questions.json'), 
+            fetch('acronyms.json'), 
+            fetch('ports.json')
+        ]);
+        this.db = await qRes.json();
+        this.acronymDB = await aRes.json();
+        this.portDB = await pRes.json();
+        document.getElementById('total-questions-badge').innerText = `${this.db.length} Fragen geladen`;
+        this.renderDashboard();
+    } catch (e) { console.error("Ladefehler:", e); }
+},
+            startBlitz(type) {
+    this.blitzType = type;
+    this.blitzCurrentIndex = 0;
+    this.blitzScore = 0;
+    const sourceDB = (type === 'acronym') ? this.acronymDB : this.portDB;
+    if (!sourceDB.length) return alert("Warte auf Daten...");
+    
+    this.blitzSessionList = [...sourceDB].sort(() => 0.5 - Math.random()).slice(0, 20);
+    
+    document.getElementById('blitz-quiz-content').classList.remove('hidden');
+    document.getElementById('blitz-result-content').classList.add('hidden');
+    
+    const timerEl = document.getElementById('blitz-timer');
+    timerEl.className = "w-12 h-12 rounded-full border-4 flex items-center justify-center font-bold " + 
+        (type === 'acronym' ? "border-orange-500 text-orange-500" : "border-red-500 text-red-500");
+    
+    this.switchView('view-blitz');
+    this.nextBlitzStep();
+},
+
+nextBlitzStep() {
+    if (this.blitzCurrentIndex >= this.blitzSessionList.length) { this.finishBlitz(); return; }
+    clearInterval(this.blitzTimer);
+    const current = this.blitzSessionList[this.blitzCurrentIndex];
+    document.getElementById('blitz-progress').innerText = `${this.blitzCurrentIndex + 1} / ${this.blitzSessionList.length}`;
+    
+    let correctValue, distractors;
+
+    if (this.blitzType === 'acronym') {
+        document.getElementById('blitz-display').innerText = current.a;
+        document.getElementById('blitz-hint').innerText = "Was bedeutet das?";
+        correctValue = current.f;
+        distractors = current.d;
+    } else {
+        // Port Panic
+        document.getElementById('blitz-display').innerText = current.s;
+        document.getElementById('blitz-hint').innerText = "Welcher Port?";
+        correctValue = current.p;
+        distractors = current.d;
+    }
+
+    const options = [...distractors, correctValue].sort(() => 0.5 - Math.random());
+    const container = document.getElementById('blitz-options');
+    container.innerHTML = "";
+
+    options.forEach(opt => {
+        const btn = document.createElement('button');
+        btn.className = "w-full p-4 border-2 border-slate-700 rounded-xl text-sm font-bold transition-all active:scale-95";
+        btn.innerText = opt;
+        btn.onclick = () => this.checkBlitz(opt, correctValue, btn);
+        container.appendChild(btn);
+    });
+
+    let timeLeft = 20;
+    document.getElementById('blitz-timer').innerText = timeLeft;
+    this.blitzTimer = setInterval(() => {
+        timeLeft--; document.getElementById('blitz-timer').innerText = timeLeft;
+        if (timeLeft <= 0) { 
+            clearInterval(this.blitzTimer); 
+            this.blitzCurrentIndex++; 
+            this.nextBlitzStep(); 
+        }
+    }, 1000);
+},
+
+checkBlitz(selected, correct, btn) {
+    clearInterval(this.blitzTimer);
+    const allBtns = document.querySelectorAll('#blitz-options button');
+    allBtns.forEach(b => b.disabled = true);
+    if (selected === correct) {
+        this.blitzScore++; btn.classList.add('bg-green-600');
+    } else {
+        btn.classList.add('bg-red-600');
+        allBtns.forEach(b => { if (b.innerText === correct) b.classList.add('correct-answer-highlight'); });
+    }
+    setTimeout(() => { this.blitzCurrentIndex++; this.nextBlitzStep(); }, 1200);
+},
+
+finishBlitz() {
+    document.getElementById('blitz-quiz-content').classList.add('hidden');
+    document.getElementById('blitz-result-content').classList.remove('hidden');
+    const title = (this.blitzType === 'acronym') ? "Akronym Attack Beendet" : "Port Panic Beendet";
+    document.getElementById('blitz-result-title').innerText = title;
+    const pct = Math.round((this.blitzScore / this.blitzSessionList.length) * 100);
+    document.getElementById('blitz-final-score').innerText = `${this.blitzScore} / ${this.blitzSessionList.length} (${pct}%)`;
+},
+
+showLanding() { 
+    clearInterval(this.timerInterval); 
+    clearInterval(this.blitzTimer); 
+    this.switchView('view-landing'); 
+},
+            // Acronym Attack
+            startAcronymTrainer() {
+                if (this.acronymDB.length === 0) { alert("Akronyme werden noch geladen..."); return; }
+                this.acronymCurrentIndex = 0; this.acronymScore = 0;
+                this.acronymSessionList = [...this.acronymDB].sort(() => 0.5 - Math.random()).slice(0, 20);
+                document.getElementById('acronym-quiz-content').classList.remove('hidden-view');
+                document.getElementById('acronym-result-content').classList.add('hidden-view');
+                this.switchView('view-acronyms'); this.nextAcronym();
+            },
+
+            nextAcronym() {
+                if (this.acronymCurrentIndex >= this.acronymSessionList.length) { this.finishAcronymSession(); return; }
+                clearInterval(this.acronymTimer);
+                const current = this.acronymSessionList[this.acronymCurrentIndex];
+                document.getElementById('acronym-progress').innerText = `BEGRIFF ${this.acronymCurrentIndex + 1} / ${this.acronymSessionList.length}`;
+                document.getElementById('acronym-display').innerText = current.a;
+                const options = [...current.d, current.f].sort(() => 0.5 - Math.random());
+                const container = document.getElementById('acronym-options');
+                container.innerHTML = "";
+                options.forEach(opt => {
+                    const btn = document.createElement('button');
+                    btn.className = "w-full p-4 border-2 border-slate-700 rounded-xl text-sm font-bold transition-all active:scale-95";
+                    btn.innerText = opt;
+                    btn.onclick = () => this.checkAcronym(opt, current.f, btn);
+                    container.appendChild(btn);
+                });
+                let timeLeft = 10;
+                const timerDisplay = document.getElementById('acronym-timer');
+                timerDisplay.innerText = timeLeft;
+                this.acronymTimer = setInterval(() => {
+                    timeLeft--; timerDisplay.innerText = timeLeft;
+                    if (timeLeft <= 0) { clearInterval(this.acronymTimer); this.acronymCurrentIndex++; this.nextAcronym(); }
+                }, 1000);
+            },
+
+            checkAcronym(selected, correct, btn) {
+                clearInterval(this.acronymTimer);
+                const allBtns = document.querySelectorAll('#acronym-options button');
+                allBtns.forEach(b => b.disabled = true);
+                if (selected === correct) {
+                    this.acronymScore++; 
+                    btn.classList.add('bg-green-600'); // CSS !important greift hier
+                } else {
+                    btn.classList.add('bg-red-600'); // CSS !important greift hier
+                    allBtns.forEach(b => { if (b.innerText === correct) b.classList.add('correct-answer-highlight'); });
+                }
+                setTimeout(() => { this.acronymCurrentIndex++; this.nextAcronym(); }, 1200);
+            },
+
+            finishAcronymSession() {
+                document.getElementById('acronym-quiz-content').classList.add('hidden-view');
+                document.getElementById('acronym-result-content').classList.remove('hidden-view');
+                const pct = Math.round((this.acronymScore / this.acronymSessionList.length) * 100);
+                document.getElementById('acronym-final-score').innerText = `${this.acronymScore} / ${this.acronymSessionList.length} (${pct}%)`;
+            },
+
+            // Simulator Logik
+            renderDashboard() {
+    const grid = document.getElementById('stats-grid'); 
+    grid.innerHTML = "";
+    const categories = ["Hardware", "Networking", "Mobile Devices", "Virtualization & Cloud", "Troubleshooting"];
+    
+    // Gesamtfortschritt berechnen für die Statistik
+    const masteredCount = this.globalStats.masteredQuestions ? this.globalStats.masteredQuestions.length : 0;
+    const totalInDb = this.db.length || 455;
+    const masteryPct = Math.round((masteredCount / totalInDb) * 100);
+    
+    document.getElementById('mastery-text').innerText = `${masteredCount} / ${totalInDb} Fragen gemeistert`;
+    document.getElementById('mastery-bar').style.width = `${masteryPct}%`;
+    
+    // Einzelne Kategorie-Karten erstellen
+    categories.forEach(cat => {
+        const data = this.globalStats.catStats[cat] || { correct: 0, total: 0 };
+        const pct = data.total > 0 ? Math.round((data.correct / data.total) * 100) : 0;
+        const color = pct >= 75 ? 'text-green-400' : (pct > 0 ? 'text-orange-400' : 'text-slate-600');
+        
+        grid.innerHTML += `
+            <div class="stat-card bg-white p-3 rounded-lg border border-slate-700 text-center">
+                <p class="text-[10px] font-bold text-slate-500 uppercase truncate">${cat}</p>
+                <p class="text-xl font-black ${color}">${pct}%</p>
+                <p class="text-[9px] text-slate-400 mt-1 font-medium">${data.correct} / ${data.total} korrekt</p>
+            </div>`;
+    });
+},
+
+            startExam() {
+                const count = parseInt(document.getElementById('exam-length').value);
+                const cat = document.getElementById('exam-category').value;
+                this.examSession = this.generateExamSet(count, cat);
+                if (this.examSession.length === 0) return;
+                this.currentQIndex = 0; this.incorrectAnswers = []; this.userStats = { totalCorrect: 0, categories: {} };
+                this.examSession.forEach(q => { if (!this.userStats.categories[q.category]) this.userStats.categories[q.category] = { total: 0, correct: 0 }; this.userStats.categories[q.category].total++; });
+                this.switchView('view-quiz'); this.renderQuestion(); this.startTimer(this.examSession.length);
+            },
+
+            generateExamSet(targetCount, targetCategory) {
+                const mastered = this.globalStats.masteredQuestions || [];
+                let pool = (targetCategory === "Unmastered") ? this.db.filter(q => !mastered.includes(q.question.match(/\[Q(\d+)\]/)?.[1] || q.question)) : [...this.db];
+                if (pool.length === 0) { alert("Keine ungelösten Fragen mehr!"); return []; }
+                let session = [];
+                if (["All", "Unmastered"].includes(targetCategory)) {
+                    const weights = { "Mobile Devices": 0.15, "Networking": 0.20, "Hardware": 0.25, "Virtualization & Cloud": 0.12, "Troubleshooting": 0.28 };
+                    for (const [cat, weight] of Object.entries(weights)) {
+                        const catPool = pool.filter(q => q.category === cat);
+                        session.push(...catPool.sort(() => 0.5 - Math.random()).slice(0, Math.round(weight * targetCount)));
+                    }
+                } else { session = pool.filter(q => q.category === targetCategory).sort(() => 0.5 - Math.random()).slice(0, targetCount); }
+                return session.sort(() => 0.5 - Math.random()).slice(0, targetCount);
+            },
+
+            renderQuestion() {
+                const q = this.examSession[this.currentQIndex]; this.selectedOptions = [];
+                document.getElementById('explanation-box').classList.add('hidden');
+                document.getElementById('options-container').style.pointerEvents = "auto";
+                document.getElementById('question-text-en').classList.add('hidden');
+                document.getElementById('toggle-en-btn').innerText = "Englisch";
+                document.getElementById('quiz-progress').innerText = `FRAGE ${this.currentQIndex + 1} / ${this.examSession.length}`;
+                document.getElementById('quiz-category').innerText = q.category;
+                document.getElementById('progress-bar').style.width = `${(this.currentQIndex / this.examSession.length) * 100}%`;
+                const parts = q.question.split('\n');
+                document.getElementById('question-text-de').innerText = parts[0];
+                document.getElementById('question-text-en').innerText = parts.slice(1).join('\n').replace('English:', '').trim();
+                const container = document.getElementById('options-container'); container.innerHTML = "";
+                q.options.forEach(opt => {
+                    const letter = opt.charAt(0);
+                    const btn = document.createElement('button');
+                    btn.className = "w-full text-left bg-white border-2 border-slate-700 p-4 rounded-xl transition-all active:scale-[0.98]";
+                    btn.innerText = opt;
+                    btn.onclick = () => { this.selectedOptions = [letter]; this.submitAnswer(); };
+                    container.appendChild(btn);
+                });
+            },
+
+            submitAnswer() {
+                const q = this.examSession[this.currentQIndex]; const letter = this.selectedOptions[0];
+                const isCorrect = q.correct.includes(letter); const isTutorMode = document.getElementById('tutor-mode').checked;
+                if (!this.globalStats.catStats[q.category]) this.globalStats.catStats[q.category] = { correct: 0, total: 0 };
+                this.globalStats.totalQuestionsAnswered++; this.globalStats.catStats[q.category].total++;
+                if (isCorrect) {
+                    this.userStats.totalCorrect++; this.userStats.categories[q.category].correct++;
+                    this.globalStats.totalCorrect++; this.globalStats.catStats[q.category].correct++;
+                    const qId = q.question.match(/\[Q(\d+)\]/)?.[1] || q.question;
+                    if (!this.globalStats.masteredQuestions) this.globalStats.masteredQuestions = [];
+                    if (!this.globalStats.masteredQuestions.includes(qId)) this.globalStats.masteredQuestions.push(qId);
+                } else { this.incorrectAnswers.push({ q: q.question, allOpts: q.options, userGot: letter, realAns: q.correct[0] }); }
+                localStorage.setItem('aPlusStats', JSON.stringify(this.globalStats));
+                if (isTutorMode) this.showTutorFeedback(isCorrect, q); else this.nextQuestion();
+            },
+
+            showTutorFeedback(isCorrect, q) {
+                const box = document.getElementById('explanation-box'); const status = document.getElementById('explanation-status');
+                const text = document.getElementById('explanation-text'); document.getElementById('options-container').style.pointerEvents = "none";
+                box.classList.remove('hidden', 'bg-green-50', 'bg-red-50');
+                if (isCorrect) {
+                    box.classList.add('bg-green-50'); status.innerText = "✓ Korrekt"; status.className = "text-[10px] font-black text-green-500 mb-1";
+                } else {
+                    box.classList.add('bg-red-50'); status.innerText = "✗ Falsch"; status.className = "text-[10px] font-black text-red-500 mb-1";
+                }
+                text.innerHTML = q.explanation || "Keine Erklärung verfügbar."; box.scrollIntoView({ behavior: 'smooth', block: 'end' });
+            },
+
+            nextQuestion() { this.currentQIndex++; if (this.currentQIndex < this.examSession.length) this.renderQuestion(); else this.finishExam(); },
+
+            finishExam() {
+                clearInterval(this.timerInterval); const pct = Math.round((this.userStats.totalCorrect / this.examSession.length) * 100);
+                document.getElementById('final-score').innerText = `${pct}%`;
+                const summary = document.getElementById('category-summary'); summary.innerHTML = "";
+                for (const [cat, s] of Object.entries(this.userStats.categories)) {
+                    const cPct = Math.round((s.correct / s.total) * 100);
+                    summary.innerHTML += `<li class="bg-slate-800 p-3 rounded border border-slate-700 flex justify-between items-center text-xs"><span>${cat}</span><span class="font-bold ${cPct >= 75 ? 'text-green-400' : 'text-red-400'}">${cPct}%</span></li>`;
+                }
+                const reviewList = document.getElementById('review-list'); reviewList.innerHTML = "";
+                if (this.incorrectAnswers.length > 0) {
+                    document.getElementById('review-section').classList.remove('hidden');
+                    this.incorrectAnswers.forEach(item => {
+                        const card = document.createElement('div'); card.className = "bg-white p-4 rounded-xl border-l-4 border-red-500";
+                        const userFullText = item.allOpts.find(o => o.startsWith(item.userGot)) || "Keine Wahl";
+                        const correctFullText = item.allOpts.find(o => o.startsWith(item.realAns)) || "Nicht gefunden";
+                        card.innerHTML = `<p class="font-bold mb-3 text-sm text-white">${item.q.split('\n')[0]}</p><div class="space-y-2"><div class="bg-red-900/20 p-2 rounded border border-red-900/50"><p class="text-[10px] font-black text-red-400 mb-1">Deine Wahl</p><p class="text-slate-300 text-xs">${userFullText}</p></div><div class="bg-green-900/20 p-2 rounded border border-green-900/50"><p class="text-[10px] font-black text-green-400 mb-1">Richtig</p><p class="text-slate-200 text-xs font-bold">${correctFullText}</p></div></div>`;
+                        reviewList.appendChild(card);
+                    });
+                }
+                this.renderDashboard(); this.switchView('view-results');
+            },
+
+            startTimer(minutes) {
+                this.secondsLeft = minutes * 60; this.updateTimerDisplay();
+                this.timerInterval = setInterval(() => { this.secondsLeft--; this.updateTimerDisplay(); if (this.secondsLeft <= 0) { clearInterval(this.timerInterval); this.finishExam(); } }, 1000);
+            },
+
+            updateTimerDisplay() { const m = Math.floor(this.secondsLeft / 60); const s = this.secondsLeft % 60; document.getElementById('quiz-timer').innerText = `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`; },
+            toggleEnglish() { const enBox = document.getElementById('question-text-en'); enBox.classList.toggle('hidden'); document.getElementById('toggle-en-btn').innerText = enBox.classList.contains('hidden') ? "Englisch" : "Verbergen"; },
+            resetGlobalStats() { if (confirm("Alle Statistiken löschen?")) { this.globalStats = { totalQuestionsAnswered: 0, totalCorrect: 0, catStats: {}, masteredQuestions: [] }; localStorage.setItem('aPlusStats', JSON.stringify(this.globalStats)); this.renderDashboard(); } },
+            abortExam() { if (confirm("Abbrechen?")) { clearInterval(this.timerInterval); this.showLanding(); } },
+            showLanding() { clearInterval(this.acronymTimer); this.switchView('view-landing'); },
+            switchView(viewId) {
+    ['view-landing', 'view-quiz', 'view-results', 'view-blitz'].forEach(id => {
+        const el = document.getElementById(id); if (el) el.classList.add('hidden-view');
+    });
+    document.getElementById(viewId).classList.remove('hidden-view');
+}
+        };
+        window.onload = () => app.init();
+    </script>
+</body>
+
+</html>
