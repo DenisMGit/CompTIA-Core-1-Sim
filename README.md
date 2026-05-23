@@ -19,7 +19,6 @@ Dieses Projekt diente mir als praktische Übung, um Logik-Strukturen in der Prog
 ## 👥 Collaboration & Success
 Um den Lernerfolg innerhalb meiner Umschulungsklasse an der **Bildungsakademie Hannover** zu unterstützen, habe ich das Tool via GitHub Pages öffentlich zugänglich gemacht. 
 * **Einsatz**: Das Tool wurde aktiv von meinen Kommilitonen zur Prüfungsvorbereitung genutzt.
-* **Ergebnis**: Alle Teilnehmer, die den Simulator zur Vorbereitung nutzten, haben ihre Prüfung erfolgreich bestanden.
 
 ## 📊 Proof of Concept (Personal Result)
 Die Effektivität des Simulators spiegelt sich auch in meinem persönlichen Ergebnis wider: 
